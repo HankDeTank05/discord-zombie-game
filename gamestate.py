@@ -1,9 +1,9 @@
 import random
 import pickle
 import time
-import math
 
 import items
+from CommandObj import *
 
 
 class GameState:
@@ -192,6 +192,69 @@ class Base:
         self.upgrade_cost = Base.upgrades[self.level]["mupgrade"]
         self.upgrade_pot = 0
 
+        self.shop = {
+            "Knife": {
+                "base level": 1,
+                "player level": 1,
+                "cost": 100,
+                "buy command": BuyKnifeCmd(100)
+            },
+            "Sword": {
+                "base level": 2,
+                "player level": 5,
+                "cost": 250,
+                "buy command": BuyCommand(250)
+            },
+            "Bow": {
+                "base level": 3,
+                "player level": 10,
+                "cost": 500,
+                "buy command": BuyCommand(500)
+            },
+            "Arrow": {
+                "base level": 3,
+                "player level": 10,
+                "cost": 25,
+                "buy command": BuyCommand(25)
+            },
+            "Pistol": {
+                "base level": 4,
+                "player level": 15,
+                "cost": 2000,
+                "buy command": BuyCommand(2000)
+            },
+            "Bullet": {
+                "base level": 4,
+                "player level": 15,
+                "cost": 50,
+                "buy command": BuyCommand(50)
+            },
+            "Shotgun": {
+                "base level": 5,
+                "player level": 25,
+                "cost": 5000,
+                "buy command": BuyCommand(5000)
+            },
+            "Shell": {
+                "base level": 5,
+                "player level": 25,
+                "cost": 75,
+                "buy command": BuyCommand(75)
+            },
+            "Flamethrower": {
+                "base level": 10,
+                "player level": 50,
+                "cost": 50000,
+                "buy command": BuyCommand(50000)
+            },
+            "Gasoline": {
+                "base level": 10,
+                "player level": 50,
+                "cost": 1000,
+                "buy command": BuyCommand(1000)
+            }
+        }
+
     def upgrade(self):
         if self.upgrade_pot > self.upgrade_cost:
             self.level += 1
@@ -204,6 +267,15 @@ class Base:
 
             self.upgrade_cost = Base.upgrades[self.level]["mupgrade"]
             self.upgrade_pot -= self.upgrade_cost
+
+            if self.level >= 2:
+                pass
+
+    def shop(self):
+        response = ""
+
+        return response
+
 
 
 class Storage:
