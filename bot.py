@@ -5,7 +5,7 @@ from discord.ext.commands import command
 from dotenv import load_dotenv
 from discord.ext import commands
 
-from gamestate import GameState
+from gamestate import *
 
 intents = discord.Intents.default()
 intents.members = True
@@ -15,7 +15,8 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 
 zombot = commands.Bot(command_prefix='z!')
 
-guild_states = {}
+guild_states = GameState.load_guild_states()
+
 
 class Shortcut:
 
@@ -35,7 +36,6 @@ class Shortcut:
 @zombot.event
 async def on_ready():
     print(f'{zombot.user.name} has connected to Discord!')
-    guild_states = GameState.load_guild_states()
 
 
 @zombot.command(name='start', help=' o - Start playing the zombie game.')
@@ -49,9 +49,9 @@ async def start(ctx):
     await ctx.send(response)
 
 
-@zombot.command(name='base', help=' x - Check the status of the base.')
+@zombot.command(name='base', help=' o - Check the status of the base.')
 async def base(ctx):
-    response = ":x:base command"
+    response = guild_states[str(ctx.guild.id)].base.status()
     await ctx.send(response)
 
 
@@ -83,6 +83,13 @@ async def profile(ctx):
 async def fight(ctx):
     response = Shortcut.get_player(ctx).fight()
     await ctx.send(response)
+
+
+@zombot.command(name='save', help=' x - Save all progress.', hidden=True, enabled=False)
+async def save(ctx):
+    if ctx.author == "HankDeTank05#3890":
+        GameState.save_guild_states(guild_states)
+        GameState.load_guild_states()
 
 
 zombot.run(TOKEN)

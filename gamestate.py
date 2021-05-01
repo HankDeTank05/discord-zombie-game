@@ -203,57 +203,61 @@ class Base:
                 "base level": 2,
                 "player level": 5,
                 "cost": 250,
-                "buy command": BuyCommand(250)
+                "buy command": BuySwordCmd(250)
             },
             "Bow": {
                 "base level": 3,
                 "player level": 10,
                 "cost": 500,
-                "buy command": BuyCommand(500)
+                "buy command": BuyBowCmd(500)
             },
             "Arrow": {
                 "base level": 3,
                 "player level": 10,
                 "cost": 25,
-                "buy command": BuyCommand(25)
+                "buy command": BuyArrowCmd(25)
             },
             "Pistol": {
                 "base level": 4,
                 "player level": 15,
                 "cost": 2000,
-                "buy command": BuyCommand(2000)
+                "buy command": BuyPistolCmd(2000)
             },
             "Bullet": {
                 "base level": 4,
                 "player level": 15,
                 "cost": 50,
-                "buy command": BuyCommand(50)
+                "buy command": BuyBulletCmd(50)
             },
             "Shotgun": {
                 "base level": 5,
                 "player level": 25,
                 "cost": 5000,
-                "buy command": BuyCommand(5000)
+                "buy command": BuyShotgunCmd(5000)
             },
             "Shell": {
                 "base level": 5,
                 "player level": 25,
                 "cost": 75,
-                "buy command": BuyCommand(75)
+                "buy command": BuyShellCmd(75)
             },
             "Flamethrower": {
                 "base level": 10,
                 "player level": 50,
                 "cost": 50000,
-                "buy command": BuyCommand(50000)
-            },
-            "Gasoline": {
-                "base level": 10,
-                "player level": 50,
-                "cost": 1000,
-                "buy command": BuyCommand(1000)
+                "buy command": BuyFlamethrowerCmd(50000)
             }
         }
+
+    def status(self):
+        response = ""
+
+        response += f":heart: Base Health: {self.cur_health}/{self.max_health}\n" \
+                    f":shield: Base Defense: {self.max_defense}/{self.cur_defense}\n" \
+                    f":dollar: Upgrade pot: {self.upgrade_pot}\n" \
+                    f":arrow_up: Next upgrade: {self.upgrade_cost}\n"
+
+        return response
 
     def upgrade(self):
         if self.upgrade_pot > self.upgrade_cost:
@@ -277,15 +281,19 @@ class Base:
         return response
 
 
-
 class Storage:
 
     def __init__(self):
-        self.guns = GunStorage(2)
-        self.bullets = BulletStorage(100)
-        self.bows = BowStorage(3)
-        self.arrows = ArrowStorage(15)
-        self.medkits = MedkitStorage(10)
+        self.weapons = WeaponStorage(10)
+        self.ammo = AmmoStorage(50)
+        self.healers = HealerStorage(100)
+
+    def status(self):
+        response = ""
+
+        response += ""
+
+        return response
 
     def store(self, _item):
         if isinstance(_item, items.Gun):
@@ -307,71 +315,38 @@ class Storage:
 
 class StorageUnit:
 
-    def __init__(self, _capacity):
+    def __init__(self, _capacity: int, _type):
         self.capacity = _capacity
+        self.type = _type
         self.items = []
 
-
-class GunStorage(StorageUnit):
-
     def store(self, _item):
-        if isinstance(_item, items.Gun) and len(self.items) < self.capacity:
+        if issubclass(_item, self.type) and len(self.items) < self.capacity:
             self.items.append(_item)
-        elif not isinstance(_item, items.Gun):
-            # item is not a gun
+        elif not issubclass(_item, self.type):
+            # item is not of the unit's storage type
             pass
         elif len(self.items) >= self.capacity:
             # storage unit is full
             pass
 
-
-class BulletStorage(StorageUnit):
-
-    def store(self, _item):
-        if isinstance(_item, items.Bullet) and len(self.items) < self.capacity:
-            self.items.append(_item)
-        elif not isinstance(_item, items.Gun):
-            # item is not a Bullet
-            pass
-        elif len(self.items) >= self.capacity:
-            # storage unit is full
-            pass
+    def upgrade_capacity(self, _new_capacity: int):
+        self.capacity = _new_capacity
 
 
-class BowStorage(StorageUnit):
+class WeaponStorage(StorageUnit):
 
-    def store(self, _item):
-        if isinstance(_item, items.Bullet) and len(self.items) < self.capacity:
-            self.items.append(_item)
-        elif not isinstance(_item, items.Bow):
-            # item is not a Bow
-            pass
-        elif len(self.items) >= self.capacity:
-            # storage unit is full
-            pass
+    def __init__(self, _capacity: int):
+        super().__init__(_capacity, Weapon)
 
 
-class ArrowStorage(StorageUnit):
+class AmmoStorage(StorageUnit):
 
-    def store(self, _item):
-        if isinstance(_item, items.Arrow) and len(self.items) < self.capacity:
-            self.items.append(_item)
-        elif not isinstance(_item, items.Arrow):
-            # item is not an Arrow
-            pass
-        elif len(self.items) >= self.capacity:
-            # storage unit is full
-            pass
+    def __init__(self, _capacity: int):
+        super().__init__(_capacity, Ammo)
 
 
-class MedkitStorage(StorageUnit):
+class HealerStorage(StorageUnit):
 
-    def store(self, _item):
-        if isinstance(_item, items.Medkit) and len(self.items) < self.capacity:
-            self.items.append(_item)
-        elif not isinstance(_item, items.Medkit):
-            # item is not a Medkit
-            pass
-        elif len(self.items) >= self.capacity:
-            # storage unit is full
-            pass
+    def __init__(self, _capacity: int):
+        super().__init__(_capacity, Healer)
