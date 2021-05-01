@@ -42,7 +42,7 @@ class GameState:
         return self.profiles[_player_name]
 
     @staticmethod
-    def load_guild_states():
+    def load_all_guild_states():
         """
         Load guild states from the file of the default filename.
         :return:
@@ -59,9 +59,33 @@ class GameState:
         return guild_states
 
     @staticmethod
-    def save_guild_states(_guild_states):
+    def load_guild_state(guild_id: int) -> dict:
         """
-        Save the current guild states to a persistent data format.
+        Load a single guild state from its pickle file.
+        :param guild_id:
+        The ID of the guild whose save state should be loaded.
+        :return:
+        Return a dictionary containing
+        """
+
+        guild_state = {}
+
+        try:
+            # try to open the guild's save state (if it exists)
+            with open(str(guild_id) + GameState.fname, 'rb') as guild_file:
+                guild_state = pickle.load(guild_file)
+        except FileNotFoundError:
+            # if the file wasn't found, write an empty dictionary to a new save state and then immediately load it
+            with open(str(guild_id) + GameState.fname, 'xb') as guild_file:
+                pickle.dump(guild_state, guild_file)
+                guild_state = pickle.load(guild_file)
+
+        return guild_state
+
+    @staticmethod
+    def save_all_guild_states(_guild_states):
+        """
+        Save all of the current guild states to a persistent data format.
         :param _guild_states:
         A dictionary whose keys are the guild ID's and whose corresponding value is a GameState object.
         :return:
@@ -69,6 +93,22 @@ class GameState:
         if isinstance(_guild_states, dict):
             with open(GameState.fname, 'wb') as guild_file:
                 pickle.dump(_guild_states, guild_file)
+
+    @staticmethod
+    def save_guild_state(guild_id: int, guild_state: dict) -> None:
+        """
+        Save a single guild's state to a file.
+        :param guild_id:
+        The ID of the guild whose state should be saved.
+        :param guild_state:
+        The dictionary containing the guild's state.
+        :return:
+        """
+
+        with open(str(guild_id) + GameState.fname, 'wb') as guild_file:
+            pickle.dump(guild_state, guild_file)
+
+        pass
 
 
 class Player:

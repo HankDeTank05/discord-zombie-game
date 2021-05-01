@@ -15,10 +15,10 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 
 zombot = commands.Bot(command_prefix='z!')
 
-guild_states = GameState.load_guild_states()
+guild_states = GameState.load_all_guild_states()
 
 
-class Shortcut:
+class sc:
 
     @staticmethod
     def get_current_guild_state(_guild_id):
@@ -26,11 +26,11 @@ class Shortcut:
 
     @staticmethod
     def get_player(ctx):
-        return Shortcut.get_current_guild_state(ctx.guild.id).get_player(ctx.author)
+        return sc.get_current_guild_state(ctx.guild.id).get_player(ctx.author)
 
     @staticmethod
     def new_player(ctx):
-        return Shortcut.get_current_guild_state(ctx.guild.id).new_player(ctx.author)
+        return sc.get_current_guild_state(ctx.guild.id).new_player(ctx.author)
 
 
 @zombot.event
@@ -75,21 +75,21 @@ async def inventory(ctx):
 
 @zombot.command(name='profile', help=" o - Check player data, such as health, money, equipped weapon, etc.")
 async def profile(ctx):
-    response = Shortcut.get_player(ctx).profile()
+    response = sc.get_player(ctx).profile()
     await ctx.send(response)
 
 
 @zombot.command(name='fight', help=' o - Kill some zombies!', aliases=['f', 'fgt'])
 async def fight(ctx):
-    response = Shortcut.get_player(ctx).fight()
+    response = sc.get_player(ctx).fight()
     await ctx.send(response)
 
 
 @zombot.command(name='save', help=' x - Save all progress.', hidden=True, enabled=False)
 async def save(ctx):
     if ctx.author == "HankDeTank05#3890":
-        GameState.save_guild_states(guild_states)
-        GameState.load_guild_states()
+        GameState.save_all_guild_states(guild_states)
+        GameState.load_all_guild_states()
 
 
 zombot.run(TOKEN)
