@@ -3,7 +3,7 @@ import pickle
 import time
 
 import items
-from CommandObj import *
+from old_CommandObj import *
 
 
 class GameState:

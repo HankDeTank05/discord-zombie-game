@@ -4,8 +4,15 @@ import discord
 from discord.ext.commands import command
 from dotenv import load_dotenv
 from discord.ext import commands
+import logging
+from player import Player
+import util
 
-from gamestate import *
+logger = logging.getLogger('discord')
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+logger.addHandler(handler)
 
 intents = discord.Intents.default()
 intents.members = True
@@ -13,24 +20,14 @@ intents.members = True
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-zombot = commands.Bot(command_prefix='z!')
+description = """A zombie apocalypse discord bot game."""
 
-guild_states = GameState.load_all_guild_states()
+zombot = commands.Bot(command_prefix='zb ', description=description, intents=intents)
 
-
-class sc:
-
-    @staticmethod
-    def get_current_guild_state(_guild_id):
-        return guild_states[str(_guild_id)]
-
-    @staticmethod
-    def get_player(ctx):
-        return sc.get_current_guild_state(ctx.guild.id).get_player(ctx.author)
-
-    @staticmethod
-    def new_player(ctx):
-        return sc.get_current_guild_state(ctx.guild.id).new_player(ctx.author)
+player_data = util.rebuild_player_data()
+owner = "HankDeTank05#3890"
+start_message = "Please start the game using `zb start` before using this command!"
+insufficient_permissions = "You do not have permission to access this command!"
 
 
 @zombot.event
@@ -38,58 +35,65 @@ async def on_ready():
     print(f'{zombot.user.name} has connected to Discord!')
 
 
-@zombot.command(name='start', help=' o - Start playing the zombie game.')
+@zombot.command()
 async def start(ctx):
-    try:
-        response = guild_states[str(ctx.guild.id)].new_player(ctx.author)
-    except KeyError:
-        print(f"Created new game state for this guild (ID: {ctx.guild.id})")
-        guild_states[str(ctx.guild.id)] = GameState()
-        response = guild_states[str(ctx.guild.id)].new_player(ctx.author)
-    await ctx.send(response)
+    """
+    Start playing the game.
+    :param ctx:
+    :return:
+    """
+    success = f"Welcome to the zombie apocalypse, {ctx.author.name}!"
+    failure = "You have already started!"
+
+    if str(ctx.author) not in player_data.keys():
+        try:
+            player_data[str(ctx.author)] = Player(ctx.author.name)
+        except FileExistsError:
+            await ctx.send(failure)
+        else:
+            await ctx.send(success)
 
 
-@zombot.command(name='base', help=' o - Check the status of the base.')
-async def base(ctx):
-    response = guild_states[str(ctx.guild.id)].base.status()
-    await ctx.send(response)
-
-
-@zombot.command(name='storage', help=' x - Check the status of the storage.')
-async def storage(ctx):
-    response = ":x:storage command"
-    await ctx.send(response)
-
-
-@zombot.command(name='equip', help=" x - Equip a weapon, some ammo, or some clothing gear.")
-async def equip(ctx, item=None):
-    response = ":x:equip command"
-    await ctx.send(response)
-
-
-@zombot.command(name='inventory', help=" x - Check the items in your inventory")
-async def inventory(ctx):
-    response = ":x:inventory command"
-    await ctx.send(response)
-
-
-@zombot.command(name='profile', help=" o - Check player data, such as health, money, equipped weapon, etc.")
+@zombot.command()
 async def profile(ctx):
-    response = sc.get_player(ctx).profile()
-    await ctx.send(response)
+    """
+    Get information about yourself.
+    :param ctx:
+    :return:
+    """
+    try:
+        await ctx.send(player_data[str(ctx.author)].profile())
+    except KeyError:
+        await ctx.send(start_message)
 
 
-@zombot.command(name='fight', help=' o - Kill some zombies!', aliases=['f', 'fgt'])
+@zombot.command()
 async def fight(ctx):
-    response = sc.get_player(ctx).fight()
-    await ctx.send(response)
+    pass
 
 
-@zombot.command(name='save', help=' x - Save all progress.', hidden=True, enabled=False)
-async def save(ctx):
-    if ctx.author == "HankDeTank05#3890":
-        GameState.save_all_guild_states(guild_states)
-        GameState.load_all_guild_states()
+@zombot.command(hidden=True)
+async def shutdown(ctx):
+    if str(ctx.author) == owner:
+        output = "Saving all player data and shutting down."
+    else:
+        output = insufficient_permissions
+    await ctx.send(output)
+
+    if str(ctx.author) == owner:
+        util.save_all_data_and_shut_down(player_data)
+
+
+@zombot.command(hidden=True)
+async def printplayerinfo(ctx):
+    if str(ctx.author) == owner:
+        output = "Check stdout"
+        util.print_dict(player_data)
+    else:
+        output = insufficient_permissions
+
+    await ctx.send(output)
+
 
 
 zombot.run(TOKEN)
