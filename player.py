@@ -4,7 +4,6 @@ import util
 
 
 class Player:
-
     max_health = [
         0,
         100

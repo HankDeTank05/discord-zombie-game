@@ -47,7 +47,7 @@ async def start(ctx):
 
     if str(ctx.author) not in player_data.keys():
         try:
-            player_data[str(ctx.author)] = Player(ctx.author.name)
+            player_data[util.make_save_key(ctx.guild.id, str(ctx.author))] = Player(ctx.author.name)
         except FileExistsError:
             await ctx.send(failure)
         else:
@@ -62,7 +62,7 @@ async def profile(ctx):
     :return:
     """
     try:
-        await ctx.send(player_data[str(ctx.author)].profile())
+        await ctx.send(player_data[util.make_save_key(ctx.guild.id, str(ctx.author))].profile())
     except KeyError:
         await ctx.send(start_message)
 
