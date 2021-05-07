@@ -33,6 +33,8 @@ owner = "HankDeTank05#3890"
 start_message = "Please start the game using `zb start` before using this command!"
 insufficient_permissions = "You do not have permission to access this command!"
 
+# TODO: organize all the player-visible commands above the permission-locked commands
+
 
 @zombot.event
 async def on_ready():
@@ -67,6 +69,9 @@ async def profile(ctx):
     :param ctx:
     :return:
     """
+
+    # TODO: change the emojis in the output
+
     save_key = util.make_save_key(ctx.guild.id, str(ctx.author))
     await ctx.send(player_data[save_key].profile())
 
@@ -104,11 +109,15 @@ async def shop(ctx):
     """
     Visit the item shop.
     """
+
+    # TODO: finish making the item shop
+
     await ctx.send(":x:shop command")
 
 
 @zombot.command(hidden=True)
 async def simulatecombat(ctx, melee: str = "knife", ranged: str = "bow", times: int = 1):
+    # TODO: add a permissions check for the simulatecombat command
     temp_player = TmpPlayer("temp")
 
     valid_melee = True
@@ -189,6 +198,7 @@ async def shutdown(ctx):
 
 @zombot.command(hidden=True)
 async def printplayerinfo(ctx):
+    # TODO: add permissions check for printplayerinfo command
     if str(ctx.author) == owner:
         output = "Check stdout"
         util.print_dict(player_data)
@@ -203,6 +213,8 @@ async def info(ctx):
     """
     Get information about aspects of the game.
     """
+
+    # TODO: add more subcommands
 
     if ctx.invoked_subcommand is None:
         response = ":x:info command"
@@ -230,6 +242,8 @@ async def _ammo(ctx):
 
     ammo = [Arrow(), Shell(), Bullet(), RifleBullet()]
 
+    # TODO: add more info here
+
     for ammo_type in ammo:
         response += f"{zombot.get_emoji(ammo_type.icon)} {ammo_type.name}\n"
 
@@ -245,6 +259,9 @@ async def _melee(ctx):
     response = ""
 
     melee = [Knife(), Crowbar(), BaseballBat(), RoadSign()]
+
+    # TODO: add more info here
+    # TODO: add melee weapon sprites
 
     for weapon in melee:
         response += f"{zombot.get_emoji(weapon.icon)} {weapon.name}\n"
@@ -262,6 +279,8 @@ async def _ranged(ctx):
 
     ranged = [Bow(), Crossbow(), Shotgun(), Pistol(), HuntingRifle(), SniperRifle()]
 
+    # TODO: add more info here
+
     for weapon in ranged:
         response += f"{zombot.get_emoji(weapon.icon)} {weapon.name}\n"
 
@@ -270,7 +289,7 @@ async def _ranged(ctx):
 
 @zombot.group(hidden=True)
 async def emoji(ctx):
-
+    # TODO: add permissions check for emoji command
     response = ""
 
     for available_emoji in zombot.emojis:
