@@ -1,6 +1,11 @@
 import os
 import pickle
+from typing import Type
+
 import player as player_module
+from commands.creations.item import CreateKnifeCmd, CreateCrowbarCmd, CreateBaseballBatCmd, CreateRoadSignCmd, \
+    CreateBowCmd, CreateCrossbowCmd, CreateShotgunCmd, CreatePistolCmd, CreateHuntingRifleCmd, CreateSniperRifleCmd
+from items.weapon import Weapon
 
 saves_folder_name = "test_saves"
 player_list_path = os.path.join(saves_folder_name, "test_player_list.txt")
@@ -9,7 +14,9 @@ emoji_symbols = {
     "level": ":muscle:",
     "health": ":heart:",
     "money": ":dollar:",
-    "exp": ":sparkles:"
+    "melee": ":boxing_glove:",
+    "range": ":flying_disc:",
+    "exp": ":sparkles:",
 }
 
 
@@ -83,16 +90,16 @@ def emoji(in_game_name: str) -> str:
 
 
 def rebuild_player_data() -> dict:
-    # step 1: get the list of player tags
-    player_tags = []
+    # step 1: get the list of save_keys
+    save_keys = []
 
     try:
         with open(player_list_path, 'rt') as player_list_file:
-            player_name = player_list_file.readline().strip()
+            save_key = player_list_file.readline().strip()
 
-            while player_name != "":
-                player_tags.append(player_name)
-                player_name = player_list_file.readline()
+            while save_key.strip() != "" and save_key not in save_keys:
+                save_keys.append(save_key.strip())
+                save_key = player_list_file.readline()
 
     except FileNotFoundError:
         pass
@@ -100,11 +107,12 @@ def rebuild_player_data() -> dict:
     # step 2: load each player's data one by one
     player_data = {}
 
-    if len(player_tags) > 0:
+    if len(save_keys) > 0:
         print("Rebuilding player_data")
-        for tag in player_tags:
-            player_name, trash = tag.split('#')
-            player_data[tag] = player_module.Player(load_progress(player_name))
+        for save_key in save_keys:
+            player_id, guild_id = str(save_key).split('@')
+            player_name, trash = player_id.split('#')
+            player_data[save_key] = player_module.Player(load_progress(player_name))
 
     return player_data
 
@@ -132,3 +140,28 @@ def print_dict(data: dict, indent: int = 0):
 
 def make_save_key(guild_id: int, player_id: str) -> str:
     return player_id + '@' + str(guild_id)
+
+
+def dict_to_proper_weapon_type(weapon_dict: dict) -> Type[Weapon]:
+    if isinstance(weapon_dict, dict):
+        weapon_name = weapon_dict["name"]
+        if weapon_name == "Knife":
+            return CreateKnifeCmd.execute(weapon_dict)
+        elif weapon_name == "Crowbar":
+            return CreateCrowbarCmd.execute(weapon_dict)
+        elif weapon_name == "Baseball Bat":
+            return CreateBaseballBatCmd.execute(weapon_dict)
+        elif weapon_name == "Road Sign":
+            return CreateRoadSignCmd.execute(weapon_dict)
+        elif weapon_name == "Bow":
+            return CreateBowCmd.execute(weapon_dict)
+        elif weapon_name == "Crossbow":
+            return CreateCrossbowCmd.execute(weapon_dict)
+        elif weapon_name == "Shotgun":
+            return CreateShotgunCmd.execute(weapon_dict)
+        elif weapon_name == "Pistol":
+            return CreatePistolCmd.execute(weapon_dict)
+        elif weapon_name == "Hunting Rifle":
+            return CreateHuntingRifleCmd.execute(weapon_dict)
+        elif weapon_name == "SniperRifle":
+            return CreateSniperRifleCmd.execute(weapon_dict)
