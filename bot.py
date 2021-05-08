@@ -28,6 +28,7 @@ description = """A zombie apocalypse discord bot game."""
 
 zombot = commands.Bot(command_prefix='zb ', description=description, intents=intents)
 
+
 player_data = util.rebuild_player_data()
 owner = "HankDeTank05#3890"
 start_message = "Please start the game using `zb start` before using this command!"
@@ -73,7 +74,10 @@ async def profile(ctx):
     # TODO: change the emojis in the output
 
     save_key = util.make_save_key(ctx.guild.id, str(ctx.author))
-    await ctx.send(player_data[save_key].profile())
+    try:
+        await ctx.send(player_data[save_key].profile())
+    except KeyError:
+        await ctx.send(start_message)
 
 
 @zombot.command()
@@ -317,3 +321,5 @@ async def _permissions(ctx):
 
 
 zombot.run(TOKEN)
+
+my_secret = os.environ['DISCORD_TOKEN']
