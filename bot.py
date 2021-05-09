@@ -6,8 +6,10 @@ from dotenv import load_dotenv
 from discord.ext import commands
 import logging
 
-from items.weapons.melee import *
-from items.weapons.ranged import *
+from items.weapons.melee import Knife, Crowbar, BaseballBat, RoadSign
+from items.weapons.ranged import Bow, Crossbow, Shotgun, Pistol, HuntingRifle, SniperRifle
+from items.weapons.ammo import Arrow, Shell, Bullet, RifleBullet
+from shop import Shop
 from player import Player, TmpPlayer
 import util
 
@@ -109,14 +111,30 @@ async def fight(ctx):
 
 
 @zombot.command()
-async def shop(ctx):
+async def shop(ctx, page: int = 1):
     """
     Visit the item shop.
     """
 
     # TODO: finish making the item shop
+    # TODO: add weapon and ammo prices (static variables in each)
 
-    await ctx.send(":x:shop command")
+    shop = Shop()
+
+    response = shop.list_items(page)
+
+    await ctx.send(response)
+
+
+@zombot.command()
+async def buy(ctx, *args):
+    """
+    Buy an item from the shop.
+    """
+
+    response = ":x:buy command"
+
+    await ctx.send(response)
 
 
 @zombot.command(hidden=True)
@@ -322,4 +340,4 @@ async def _permissions(ctx):
 
 zombot.run(TOKEN)
 
-my_secret = os.environ['DISCORD_TOKEN']
+# my_secret = os.environ['DISCORD_TOKEN']

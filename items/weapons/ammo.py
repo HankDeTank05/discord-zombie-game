@@ -3,31 +3,43 @@ from items.weapons.categories import Ammo
 
 class Arrow(Ammo):
 
-    tags = Ammo.tags + ["archery"]
+    name = "Arrow"
+    price = -1
+
+    tags = Ammo.tags + ["archery", name.lower()]
 
     def __init__(self):
-        super().__init__("Arrow", 839627706378879016, 1)
+        super().__init__(Arrow.name, 839627706378879016, 1)
 
 
 class Shell(Ammo):
 
-    tags = Ammo.tags + ["mid-range"]
+    name = "Shotgun Shell"
+    price = -1
+
+    tags = Ammo.tags + ["mid-range", name.lower()]
 
     def __init__(self):
-        super().__init__("Shotgun Shell", 839628068448501781, 1)
+        super().__init__(Shell.name, 839628068448501781, 1)
 
 
 class Bullet(Ammo):
 
-    tags = Ammo.tags + ["mid-range"]
+    name = "Bullet"
+    price = -1
+
+    tags = Ammo.tags + ["mid-range", name.lower()]
 
     def __init__(self):
-        super().__init__("Bullet", 839627813254070322, 1)
+        super().__init__(Bullet.name, 839627813254070322, 1)
 
 
 class RifleBullet(Ammo):
 
-    tags = Ammo.tags + ["long-range", "rifle"]
+    name = "Rifle Bullet"
+    price = -1
+
+    tags = Ammo.tags + ["long-range", "rifle", name.lower()]
 
     def __init__(self):
-        super().__init__("Rifle Bullet", 839628016929472552, 1)
+        super().__init__(RifleBullet.name, 839628016929472552, 1)
