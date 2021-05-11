@@ -1,8 +1,10 @@
+import math
+
+import player
+from items import item
 from items.weapons.ammo import Arrow, Shell, Bullet, RifleBullet
 from items.weapons.melee import Knife, Crowbar, BaseballBat, RoadSign
 from items.weapons.ranged import Bow, Crossbow, Shotgun, Pistol, HuntingRifle, SniperRifle
-from math import ceil
-import random
 
 
 class Shop:
@@ -14,7 +16,7 @@ class Shop:
 
     def list_items(self, page: int = 1) -> str:
         response = ""
-        if 0 < page <= ceil(len(self.items)/Shop.items_per_page):
+        if 0 < page <= math.ceil(len(self.items)/Shop.items_per_page):
             stop = int(Shop.items_per_page * page)
             start = stop - 10
             if stop > len(self.items):
@@ -30,6 +32,9 @@ class Shop:
             response = "Invalid page number!"
 
         return response
+
+    def buy_item(player: player.Player, item_index: int) -> Type[item.Item]:
+        pass
 
 
 class List:
