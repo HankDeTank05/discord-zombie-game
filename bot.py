@@ -127,17 +127,26 @@ async def shop(ctx, page: int = 1):
 
 
 @zombot.command()
-async def buy(ctx, *args):
+async def buy(ctx, item_index: int):
     """
     Buy an item from the shop.
     """
 
-    response = ":x:buy command"
+    response = ""
+
+    plr = player_data[util.make_save_key(ctx.guild.id, str(ctx.author))]
+
+    shop_success = Shop.buy_item(plr, item_index)
+    if shop_success:
+        response = f"You purchased a {plr.inventory[-1].name} for ${plr.inventory[-1].price}."
+    else:
+        response = f"There was an error purchasing this item. Either it is not available for purchase or you do not " \
+                   f"have enough money to purchase it. "
 
     await ctx.send(response)
 
 
-@zombot.command(hidden=True)
+@zombot.command(name="simulate_combat", hidden=True)
 async def simulatecombat(ctx, melee: str = "knife", ranged: str = "bow", times: int = 1):
     # TODO: add a permissions check for the simulatecombat command
     temp_player = TmpPlayer("temp")

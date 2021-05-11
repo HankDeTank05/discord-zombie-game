@@ -24,17 +24,23 @@ class Player:
 
             # update weapon_melee
             try:
-                self.weapon_melee = util.dict_to_proper_weapon_type(player["weapon_melee"])
+                self.weapon_melee = util.dict_to_proper_item_type(player["weapon_melee"])
             except KeyError:
                 self.weapon_melee = Knife()
 
             # update weapon_ranged
             try:
-                self.weapon_ranged = util.dict_to_proper_weapon_type(player["weapon_ranged"])
+                self.weapon_ranged = util.dict_to_proper_item_type(player["weapon_ranged"])
             except KeyError:
                 self.weapon_ranged = Bow()
 
             # update inventory
+            self.inventory = []
+            try:
+                for key in player["inventory"]:
+                    self.inventory.append(util.dict_to_proper_item_type(player["inventory"][key]))
+            except KeyError:
+                pass
 
         elif isinstance(player, str):
             self.id = player
@@ -49,13 +55,17 @@ class Player:
             print(f"Making a new file for {player}")
 
     def make_data_dict(self) -> dict:
+        inventory_dict = {}
+        for item in self.inventory:
+            inventory_dict[item.name] = item.make_data_dict()
         data = {
             "id": self.id,
             "level": self.level,
             "health": self.health,
             "money": self.money,
             "weapon_melee": self.weapon_melee.make_data_dict(),
-            "weapon_ranged": self.weapon_ranged.make_data_dict()
+            "weapon_ranged": self.weapon_ranged.make_data_dict(),
+            "inventory": inventory_dict
         }
         return data
 

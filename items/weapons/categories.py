@@ -4,15 +4,29 @@ from items.weapon import Weapon
 
 
 class Ammo(Weapon):
-
     tags = Weapon.tags + ["ammo"]
 
-    def __init__(self, name: str, emoji_id: int, damage_out: int):
-        super().__init__(name, emoji_id, damage_out, 1)
+    def __init__(self, name: Union[str, dict],
+                 emoji_id: int = None,
+                 damage_out: int = None):
+        if isinstance(name, str) \
+                and emoji_id is not None \
+                and damage_out is not None:
+            super().__init__(name, emoji_id, damage_out, 1)
+        else:
+            super().__init__(name["name"], name["icon"], name["damage_out"])
+
+    def make_data_dict(self) -> dict:
+        data = {
+            "item_type": "ammo",
+            "name": self.name,
+            "icon": self.icon,
+            "damage_out": self.damage_out
+        }
+        return data
 
 
 class MeleeWeapon(Weapon):
-
     tags = Weapon.tags + ["melee weapon"]
 
     def __init__(self, name: Union[str, dict],
@@ -31,8 +45,9 @@ class MeleeWeapon(Weapon):
             super().__init__(name["name"], name["icon"], name["damage_out"], name["durability"])
             self.range_max = name["range_max"]
 
-    def make_data_dict(self):
+    def make_data_dict(self) -> dict:
         data = {
+            "item_type": "melee",
             "name": self.name,
             "icon": self.icon,
             "damage_out": self.damage_out,
@@ -46,7 +61,6 @@ class MeleeWeapon(Weapon):
 
 
 class RangedWeapon(Weapon):
-
     tags = Weapon.tags + ["ranged weapon"]
 
     def __init__(self, name: Union[str, dict],
@@ -71,8 +85,9 @@ class RangedWeapon(Weapon):
             self.range_max = name["range_max"]
             self.ammo_type = name["ammo_type"]
 
-    def make_data_dict(self):
+    def make_data_dict(self) -> dict:
         data = {
+            "item_type": "ranged",
             "name": self.name,
             "icon": self.icon,
             "damage_out": self.damage_out,

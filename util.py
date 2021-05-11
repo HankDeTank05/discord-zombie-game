@@ -3,8 +3,11 @@ import pickle
 from typing import Type
 
 import player as player_module
-from commands.creations.item import CreateKnifeCmd, CreateCrowbarCmd, CreateBaseballBatCmd, CreateRoadSignCmd, \
-    CreateBowCmd, CreateCrossbowCmd, CreateShotgunCmd, CreatePistolCmd, CreateHuntingRifleCmd, CreateSniperRifleCmd
+# from commands.creations.item import CreateKnifeCmd, CreateCrowbarCmd, CreateBaseballBatCmd, CreateRoadSignCmd, \
+#     CreateBowCmd, CreateCrossbowCmd, CreateShotgunCmd, CreatePistolCmd, CreateHuntingRifleCmd, CreateSniperRifleCmd
+from items.weapons.ammo import *
+from items.weapons.melee import *
+from items.weapons.ranged import *
 from items.weapon import Weapon
 
 saves_folder_name = "test_saves"
@@ -142,26 +145,43 @@ def make_save_key(guild_id: int, player_id: str) -> str:
     return player_id + '@' + str(guild_id)
 
 
-def dict_to_proper_weapon_type(weapon_dict: dict) -> Type[Weapon]:
-    if isinstance(weapon_dict, dict):
-        weapon_name = weapon_dict["name"]
-        if weapon_name == "Knife":
-            return CreateKnifeCmd.execute(weapon_dict)
-        elif weapon_name == "Crowbar":
-            return CreateCrowbarCmd.execute(weapon_dict)
-        elif weapon_name == "Baseball Bat":
-            return CreateBaseballBatCmd.execute(weapon_dict)
-        elif weapon_name == "Road Sign":
-            return CreateRoadSignCmd.execute(weapon_dict)
-        elif weapon_name == "Bow":
-            return CreateBowCmd.execute(weapon_dict)
-        elif weapon_name == "Crossbow":
-            return CreateCrossbowCmd.execute(weapon_dict)
-        elif weapon_name == "Shotgun":
-            return CreateShotgunCmd.execute(weapon_dict)
-        elif weapon_name == "Pistol":
-            return CreatePistolCmd.execute(weapon_dict)
-        elif weapon_name == "Hunting Rifle":
-            return CreateHuntingRifleCmd.execute(weapon_dict)
-        elif weapon_name == "SniperRifle":
-            return CreateSniperRifleCmd.execute(weapon_dict)
+def dict_to_proper_item_type(item_dict: dict):
+    if isinstance(item_dict, dict):
+        item_name = item_dict["name"]
+        # melee weapons
+        if item_name == Knife.name:
+            return Knife(item_dict)
+        elif item_name == Crowbar.name:
+            return Crowbar(item_dict)
+        elif item_name == BaseballBat.name:
+            return BaseballBat(item_dict)
+        elif item_name == RoadSign.name:
+            return RoadSign(item_dict)
+
+        # archery stuff
+        elif item_name == Arrow.name:
+            return Arrow()
+        elif item_name == Bow.name:
+            return Bow(item_dict)
+        elif item_name == Crossbow.name:
+            return Crossbow(item_dict)
+
+        # shotgun stuff
+        elif item_name == Shell.name:
+            return Shell()
+        elif item_name == Shotgun.name:
+            return Shotgun(item_dict)
+
+        # pistol stuff
+        elif item_name == Bullet.name:
+            return Bullet()
+        elif item_name == Pistol.name:
+            return Pistol(item_dict)
+
+        # rifle stuff
+        elif item_name == RifleBullet.name:
+            return RifleBullet()
+        elif item_name == HuntingRifle.name:
+            return HuntingRifle(item_dict)
+        elif item_name == SniperRifle.name:
+            return SniperRifle(item_dict)

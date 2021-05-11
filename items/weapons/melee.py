@@ -4,7 +4,7 @@ from items.weapons.categories import MeleeWeapon
 class Knife(MeleeWeapon):
 
     name = "Knife"
-    price = -1
+    price = 5
 
     tags = MeleeWeapon.tags + [name.lower()]
     bonus_additive = 2

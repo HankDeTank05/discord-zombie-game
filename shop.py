@@ -1,4 +1,5 @@
 import math
+from typing import Type
 
 import player
 from items import item
@@ -14,27 +15,36 @@ class Shop:
     def __init__(self):
         self.items = List.items
 
-    def list_items(self, page: int = 1) -> str:
+    @staticmethod
+    def list_items(page: int = 1) -> str:
         response = ""
-        if 0 < page <= math.ceil(len(self.items)/Shop.items_per_page):
+        if 0 < page <= math.ceil(len(List.items)/Shop.items_per_page):
             stop = int(Shop.items_per_page * page)
             start = stop - 10
-            if stop > len(self.items):
-                stop = len(self.items)
+            if stop > len(List.items):
+                stop = len(List.items)
             for i in range(start, stop):
                 num = i+1
                 if num < 10:
                     response += "` "
                 else:
                     response += "`"
-                response += f"{num}. ${self.items[i].cost}\t`{self.items[i].name}\n"
+                response += f"{num}. ${List.items[i].price}\t`{List.items[i].name}\n"
         else:
             response = "Invalid page number!"
 
         return response
 
-    def buy_item(player: player.Player, item_index: int) -> Type[item.Item]:
-        pass
+    @staticmethod
+    def buy_item(plr: player.Player, item_index: int) -> bool:
+        item_index -= 1
+        purchase = List.items[item_index]()
+        if len(plr.inventory) < player.Player.max_inventory and 0 <= purchase.price <= plr.money:
+            plr.money -= purchase.price
+            plr.inventory.append(purchase)
+            return True
+        else:
+            return False
 
 
 class List:
