@@ -153,7 +153,9 @@ async def simulatecombat(ctx, melee: str = "knife", ranged: str = "bow", times: 
 
     valid_melee = True
     melee = melee.lower()
-    if melee == "knife":
+    if melee == "none":
+        temp_player.weapon_melee = None
+    elif melee == "knife":
         temp_player.weapon_melee = Knife()
     elif melee == "crowbar":
         temp_player.weapon_melee = Crowbar()
@@ -166,7 +168,9 @@ async def simulatecombat(ctx, melee: str = "knife", ranged: str = "bow", times: 
 
     valid_ranged = True
     ranged = ranged.lower()
-    if ranged == "bow":
+    if ranged == "none":
+        temp_player.weapon_melee = None
+    elif ranged == "bow":
         temp_player.weapon_ranged = Bow()
     elif ranged == "crossbow":
         temp_player.weapon_ranged = Crossbow()
@@ -290,12 +294,15 @@ async def _melee(ctx):
     response = ""
 
     melee = [Knife(), Crowbar(), BaseballBat(), RoadSign()]
+    attributes = ["Name", "Price", "Damage Out", "Base Durability", "Range (max)"]
 
-    # TODO: add more info here
-    # TODO: add melee weapon sprites
+    row_header_format = "{:^15}" * len(attributes)
+    row_format = "{:<15}" + "{:^15}" * (len(attributes) - 1)
+
+    response += "`" + row_header_format.format(*attributes) + "`\n"
 
     for weapon in melee:
-        response += f"{zombot.get_emoji(weapon.icon)} {weapon.name}\n"
+        response += "`" + row_format.format(weapon.name, weapon.price, weapon.damage_out, weapon.base_durability, weapon.range_max) + "`\n"
 
     await ctx.send(response)
 
@@ -309,11 +316,24 @@ async def _ranged(ctx):
     response = ""
 
     ranged = [Bow(), Crossbow(), Shotgun(), Pistol(), HuntingRifle(), SniperRifle()]
+    attributes = ["Name", "Price", "Base Durability", "Range (min)", "Range (max)", "Ammo Type", "Ammo Damage"]
 
-    # TODO: add more info here
+    row_header_format = "{:^15}" * len(attributes)
+    row_format = "{:<15}" + "{:^15}" * (len(attributes) - 3) + "{:<15}" + "{:^15}"
+
+    response += "`" + row_header_format.format(*attributes) + "`\n"
 
     for weapon in ranged:
-        response += f"{zombot.get_emoji(weapon.icon)} {weapon.name}\n"
+        emoji_string = f"{zombot.get_emoji(weapon.icon)}"
+        weapon_string = f"` \t{weapon.name}"
+        info_string = f"{weapon.price}\t" \
+                      f"{weapon.base_durability}\t" \
+                      f"{weapon.range_min}\t" \
+                      f"{weapon.range_max}\t`" \
+                      f"{zombot.get_emoji(weapon.ammo_type.emoji_id)}\n"
+        response += "`" + row_format.format(weapon.name, weapon.price, weapon.base_durability, weapon.range_min, weapon.range_max, weapon.ammo_type.name, weapon.ammo_type.damage_out) + "`\n"
+
+    # response += "NOTE: use `info weapons [weapon]` to see more detailed weapon information!"
 
     await ctx.send(response)
 

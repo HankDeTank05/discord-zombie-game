@@ -67,4 +67,7 @@ class List:
         Pistol,
         HuntingRifle,
         SniperRifle
+
+        # consumables category
+
     ]

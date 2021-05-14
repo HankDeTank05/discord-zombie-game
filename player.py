@@ -4,7 +4,7 @@ from typing import Union, Type
 import util
 from items.item import Item
 from items.weapons.melee import Knife
-from items.weapons.ranged import Bow
+from items.weapons.ranged import Bow, SniperRifle
 
 
 class Player:
@@ -82,29 +82,55 @@ class Player:
         util.save_progress(self.id, self.make_data_dict())
 
     def inter_range_size(self) -> int:
-        inter_range_size = max(self.weapon_ranged.range_size(), self.weapon_melee.range_size()) \
-                           - min(self.weapon_ranged.range_size(), self.weapon_melee.range_size())
+        inter_range_size = None
+
+        if self.weapon_melee is not None and self.weapon_ranged is not None:
+            inter_range_size = max(self.weapon_ranged.range_size(), self.weapon_melee.range_size()) \
+                               - min(self.weapon_ranged.range_size(), self.weapon_melee.range_size())
+        elif self.weapon_ranged is not None:
+            return self.weapon_ranged.range_size()
+        elif self.weapon_melee is not None:
+            return SniperRifle.range_max - self.weapon_melee.range_max
+
         return max(0, inter_range_size)
 
     def armor_total(self) -> int:
         return 0
 
     def fight(self):
-        health_difference = self.inter_range_size() + random.randrange(0, self.inter_range_size()) - self.armor_total()
-        self.health -= health_difference
+        if self.weapon_melee is not None or self.weapon_ranged is not None:
 
-        zombies_killed = self.weapon_melee.range_size() \
-                         + self.weapon_ranged.range_size() \
+            # health
+            health_difference = self.inter_range_size() + random.randrange(0, self.inter_range_size()) - self.armor_total()
+            # lose health
+            self.health -= health_difference
 
-        money_gained = zombies_killed \
-                       + random.randrange(0, self.weapon_melee.bonus_additive + self.weapon_ranged.bonus_additive)
-        self.money += money_gained
+            # kills
+            zombies_killed = 0
+            if self.weapon_melee is not None:
+                zombies_killed += self.weapon_melee.range_size()
+            if self.weapon_ranged is not None:
+                zombies_killed += self.weapon_ranged.range_size()
+            # profit from kills
+            total_bonus_additive = 0
+            if self.weapon_melee is not None:
+                total_bonus_additive += self.weapon_melee.bonus_additive
+            if self.weapon_ranged is not None:
+                total_bonus_additive += self.weapon_ranged.bonus_additive
+            
+            if self.weapon_melee is not None and self.weapon_ranged is not None:
+                total_bonus_additive *= 2
+            money_gained = zombies_killed + random.randrange(0, total_bonus_additive + 1)
+            # earn profit from kills
+            self.money += money_gained
 
-        output = f"__**Fighting Zombies**__\n" \
-                 f"You lost {health_difference} health fighting zombies...\n" \
-                 f"Your health is now {util.emoji('health')} {self.health}/{Player.max_health[self.level]}\n" \
-                 f"You killed {zombies_killed} zombies!\n" \
-                 f"On the bright side, you earned {util.emoji('money')} ${money_gained} from it!"
+            output = f"__**Fighting Zombies**__\n" \
+                     f"You lost {health_difference} health fighting zombies...\n" \
+                     f"Your health is now {util.emoji('health')} {self.health}/{Player.max_health[self.level]}\n" \
+                     f"You killed {zombies_killed} zombies!\n" \
+                     f"On the bright side, you earned {util.emoji('money')} ${money_gained} from it!"
+        else:
+            output = "You cannot fight without weapons equipped!"
 
         return output
 
