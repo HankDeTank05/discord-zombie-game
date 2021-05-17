@@ -1,6 +1,8 @@
-class Item:
+from items.tagging import Tags
 
-    tags = []
+
+class Item:
+    tags = [Tags.item]
     price = -1
 
     def __init__(self, name: str, emoji_id: int):
@@ -12,3 +14,7 @@ class Item:
             "item_type": "item",
             "icon": self.icon
         }
+        return data
+
+
+NoneDict = {"name": "none"}

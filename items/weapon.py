@@ -1,9 +1,10 @@
 from items.item import Item
+from items.tagging import Tags
 
 
 class Weapon(Item):
 
-    tags = Item.tags + ["weapons"]
+    tags = Item.tags + [Tags.weapons, Tags.weapon, Tags.equippable]
 
     def __init__(self, name: str, emoji_id: int, damage_out: int, durability: int):
         super().__init__(name, emoji_id)

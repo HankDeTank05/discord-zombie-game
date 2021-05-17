@@ -5,10 +5,10 @@ from typing import Type
 import player as player_module
 # from commands.creations.item import CreateKnifeCmd, CreateCrowbarCmd, CreateBaseballBatCmd, CreateRoadSignCmd, \
 #     CreateBowCmd, CreateCrossbowCmd, CreateShotgunCmd, CreatePistolCmd, CreateHuntingRifleCmd, CreateSniperRifleCmd
-from items.weapons.ammo import *
-from items.weapons.melee import *
-from items.weapons.ranged import *
-from items.weapon import Weapon
+import items.weapons.melee as MeleeWeapon_module
+import items.weapons.ranged as RangedWeapon_module
+import items.weapons.ammo as Ammo_module
+import items.consumables.health as HealthConsumable_module
 
 saves_folder_name = "test_saves"
 player_list_path = os.path.join(saves_folder_name, "test_player_list.txt")
@@ -111,17 +111,17 @@ def rebuild_player_data() -> dict:
     player_data = {}
 
     if len(save_keys) > 0:
-        print("Rebuilding player_data")
+        print("Rebuilding player_data...", end=" ")
         for save_key in save_keys:
             player_id, guild_id = str(save_key).split('@')
             player_name, trash = player_id.split('#')
             player_data[save_key] = player_module.Player(load_progress(player_name))
-
+    print("Done!")
     return player_data
 
 
 def save_all_data_and_shut_down(player_data: dict):
-    with open(player_list_path, 'a') as player_list_file:
+    with open(player_list_path, 'w') as player_list_file:
         for save_key in player_data.keys():
             player_id, guild_id = str(save_key).split('@')
             player_name, trash = player_id.split('#')
@@ -148,40 +148,64 @@ def make_save_key(guild_id: int, player_id: str) -> str:
 def dict_to_proper_item_type(item_dict: dict):
     if isinstance(item_dict, dict):
         item_name = item_dict["name"]
+        # special case
+        if item_name == "none":
+            return None
+
         # melee weapons
-        if item_name == Knife.name:
-            return Knife(item_dict)
-        elif item_name == Crowbar.name:
-            return Crowbar(item_dict)
-        elif item_name == BaseballBat.name:
-            return BaseballBat(item_dict)
-        elif item_name == RoadSign.name:
-            return RoadSign(item_dict)
+        elif item_name == MeleeWeapon_module.Knife.name:
+            return MeleeWeapon_module.Knife(item_dict)
+        elif item_name == MeleeWeapon_module.Crowbar.name:
+            return MeleeWeapon_module.Crowbar(item_dict)
+        elif item_name == MeleeWeapon_module.BaseballBat.name:
+            return MeleeWeapon_module.BaseballBat(item_dict)
+        elif item_name == MeleeWeapon_module.RoadSign.name:
+            return MeleeWeapon_module.RoadSign(item_dict)
 
         # archery stuff
-        elif item_name == Arrow.name:
-            return Arrow()
-        elif item_name == Bow.name:
-            return Bow(item_dict)
-        elif item_name == Crossbow.name:
-            return Crossbow(item_dict)
+        elif item_name == Ammo_module.Arrow.name:
+            return Ammo_module.Arrow()
+        elif item_name == RangedWeapon_module.Bow.name:
+            return RangedWeapon_module.Bow(item_dict)
+        elif item_name == RangedWeapon_module.Crossbow.name:
+            return RangedWeapon_module.Crossbow(item_dict)
 
         # shotgun stuff
-        elif item_name == Shell.name:
-            return Shell()
-        elif item_name == Shotgun.name:
-            return Shotgun(item_dict)
+        elif item_name == Ammo_module.Shell.name:
+            return Ammo_module.Shell()
+        elif item_name == RangedWeapon_module.Shotgun.name:
+            return RangedWeapon_module.Shotgun(item_dict)
 
         # pistol stuff
-        elif item_name == Bullet.name:
-            return Bullet()
-        elif item_name == Pistol.name:
-            return Pistol(item_dict)
+        elif item_name == Ammo_module.Bullet.name:
+            return Ammo_module.Bullet()
+        elif item_name == RangedWeapon_module.Pistol.name:
+            return RangedWeapon_module.Pistol(item_dict)
 
         # rifle stuff
-        elif item_name == RifleBullet.name:
-            return RifleBullet()
-        elif item_name == HuntingRifle.name:
-            return HuntingRifle(item_dict)
-        elif item_name == SniperRifle.name:
-            return SniperRifle(item_dict)
+        elif item_name == Ammo_module.RifleBullet.name:
+            return Ammo_module.RifleBullet()
+        elif item_name == RangedWeapon_module.HuntingRifle.name:
+            return RangedWeapon_module.HuntingRifle(item_dict)
+        elif item_name == RangedWeapon_module.SniperRifle.name:
+            return RangedWeapon_module.SniperRifle(item_dict)
+
+        # health consumables
+        elif item_name == HealthConsumable_module.PainKillers.name:
+            return HealthConsumable_module.PainKillers(item_dict)
+        elif item_name == HealthConsumable_module.FirstAidKit.name:
+            return HealthConsumable_module.FirstAidKit(item_dict)
+        elif item_name == HealthConsumable_module.Medkit.name:
+            return HealthConsumable_module.Medkit(item_dict)
+        elif item_name == HealthConsumable_module.Antidote.name:
+            return HealthConsumable_module.Antidote(item_dict)
+
+        # armor
+
+        # buff gear
+
+        # storage gear
+
+        # if name is not found
+        else:
+            print(f"ERROR: {item_dict['name']} has not been added to dict_to_proper_item_type(item_dict) function!!!")

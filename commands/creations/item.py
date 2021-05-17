@@ -1,8 +1,7 @@
 from commands.creation import ItemCreationCmd
-from items.weapons.ammo import Arrow, Shell, Bullet, RifleBullet
-from items.weapons.categories import RangedWeapon, MeleeWeapon, Ammo
-from items.weapons.melee import Knife, Crowbar, BaseballBat, RoadSign
-from items.weapons.ranged import Bow, Crossbow, Shotgun, Pistol, HuntingRifle, SniperRifle
+from items.weapons.ammo import Arrow, Shell, Bullet, RifleBullet, Ammo
+from items.weapons.melee import Knife, Crowbar, BaseballBat, RoadSign, MeleeWeapon
+from items.weapons.ranged import Bow, Crossbow, Shotgun, Pistol, HuntingRifle, SniperRifle, RangedWeapon
 
 """ Ranged weapon creations """
 
