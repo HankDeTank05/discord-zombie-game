@@ -79,8 +79,8 @@ class Crossbow(RangedWeapon):
 
     name = "Crossbow"
     emoji_id = 839627864123113532
-    price = -1
-    base_durability = 10
+    price = 500
+    base_durability = 100
     range_min = 5
     range_max = 15
     ammo_type = Arrow
@@ -104,8 +104,8 @@ class Shotgun(RangedWeapon):
 
     name = "Shotgun"
     emoji_id = 839628122935918592
-    price = -1
-    base_durability = 10
+    price = 2000
+    base_durability = 250
     range_min = 5
     range_max = 15
     ammo_type = Shell
@@ -129,8 +129,8 @@ class Pistol(RangedWeapon):
 
     name = "Pistol"
     emoji_id = 839627965049995284
-    price = -1
-    base_durability = 10
+    price = 5000
+    base_durability = 250
     range_min = 7
     range_max = 20
     ammo_type = Bullet
@@ -154,8 +154,8 @@ class HuntingRifle(RangedWeapon):
 
     name = "Hunting Rifle"
     emoji_id = 839627913023324221
-    price = -1
-    base_durability = 10
+    price = 20000
+    base_durability = 300
     range_min = 10
     range_max = 30
     ammo_type = RifleBullet
@@ -179,8 +179,8 @@ class SniperRifle(RangedWeapon):
 
     name = "Sniper Rifle"
     emoji_id = 839628168503885844
-    price = -1
-    base_durability = 10
+    price = 50000
+    base_durability = 300
     range_min = 15
     range_max = 45
     ammo_type = RifleBullet

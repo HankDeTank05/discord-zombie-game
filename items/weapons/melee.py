@@ -64,9 +64,9 @@ class Crowbar(MeleeWeapon):
 
     name = "Crowbar"
     emoji_id = 840278787068526653
-    price = -1
+    price = 300
     damage_out = 1
-    base_durability = 10
+    base_durability = 100
     range_max = 3
 
     tags = MeleeWeapon.tags + [name.lower()]
@@ -83,9 +83,9 @@ class BaseballBat(MeleeWeapon):
 
     name = "Baseball Bat"
     emoji_id = 840278679791206401
-    price = -1
+    price = 900
     damage_out = 1
-    base_durability = 10
+    base_durability = 75
     range_max = 5
 
     tags = MeleeWeapon.tags + [name.lower()]
@@ -102,9 +102,9 @@ class RoadSign(MeleeWeapon):
 
     name = "Road Sign"
     emoji_id = 840278833353850891
-    price = -1
+    price = 1200
     damage_out = 1
-    base_durability = 10
+    base_durability = 175
     range_max = 7
 
     tags = MeleeWeapon.tags = [name.lower()]

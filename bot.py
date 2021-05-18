@@ -85,7 +85,7 @@ async def profile(ctx):
 
     save_key = util.make_save_key(ctx.guild.id, str(ctx.author))
     try:
-        await ctx.send(player_data[save_key].profile())
+        await ctx.send(player_data[save_key].profile(zombot))
     except KeyError:
         await ctx.send(start_message)
 
@@ -124,10 +124,17 @@ async def fight(ctx):
         * NOTE: "related to" is not the same as "directly correlated with"!
         * You may not earn the same amount of money each time you fight, even if your total attack range doesn't change.
         * The larger your total attack range (melee range + distance range), the more zombies you're likely to kill.
+
+    * You earn 3 EXP per kill.
     """
     # TODO: add a check-and-delete for weapons whose durability is zero or lower (see the todo in the USE command for details)
     save_key = util.make_save_key(ctx.guild.id, str(ctx.author))
-    await ctx.send(player_data[save_key].fight())
+    response, level_up = player_data[save_key].fight()
+    await ctx.send(response)
+
+    if level_up:
+        level_up_response = f"You leveled up! You're now level {player_data[save_key].level}!"
+        await ctx.send(level_up_response)
 
 
 @zombot.group()
@@ -138,13 +145,12 @@ async def shop(ctx):
     response = ""
 
     if ctx.invoked_subcommand is None:
-        for category in Shop.categories:
-            response += category + "\n"
+        response = "Use `shop search` or `shop page` to see shop listings."
 
         await ctx.send(response)
 
 
-@shop.command(name="page")
+@shop.command(name="page", aliases=["pg", "p"])
 async def _page(ctx, page: int = 1):
 
     # TODO: finish making the item shop
@@ -155,7 +161,6 @@ async def _page(ctx, page: int = 1):
     response = Shop.list_items(page)
 
     await ctx.send(response)
-
 
 
 @shop.command(name="search")
@@ -210,9 +215,12 @@ async def use(ctx, *args):
     item_found = False
     item_found_tags = []
     item_out_of_uses = False
+    item_cannot_use = False
 
     save_key = util.make_save_key(ctx.guild.id, str(ctx.author))
     plr = player_data[save_key]
+
+    response = ""
 
     for inv_item in plr.inventory:
         if inv_item.name.lower() == item_to_use.lower():
@@ -221,8 +229,15 @@ async def use(ctx, *args):
             item_found_tags = inv_item.tags
             if "usable" in inv_item.tags:
                 if isinstance(inv_item, HealthConsumable):
-                    inv_item.use(plr)
-                else:
+                    if plr.health < plr.max_health[plr.level]:
+                        pre_use_health = plr.health
+                        inv_item.use(plr)
+                        response = f"{util.emoji('health')}{pre_use_health}/{plr.max_health[plr.level]} --> " \
+                                   f"{util.emoji('health')}{plr.health}/{plr.max_health[plr.level]}\n"
+                    else:
+                        response = f"Your health is already maxed out at {util.emoji('health')}{plr.health}!\n"
+                        item_cannot_use = True
+                elif isinstance(inv_item, Consumable):
                     inv_item.use()
 
                 item_used = True
@@ -234,12 +249,12 @@ async def use(ctx, *args):
 
                 break
 
-    response = ""
-
     if item_found:
         if item_used:
             if item_out_of_uses:
                 response += f"You used the rest of the {item_name_capitalized}!"
+            elif item_cannot_use:
+                pass
             else:
                 response += f"You used your {item_name_capitalized}!"
         else:
@@ -258,6 +273,9 @@ async def equip(ctx, *args):
     """
     Equip armor, gear, or a weapon from your inventory.
     """
+
+    # TODO: THIS COMMAND IS BUGGY, NEEDS FIXING
+
     item_to_equip = ""
     for arg in args:
         item_to_equip += arg + " "
@@ -283,16 +301,19 @@ async def equip(ctx, *args):
                     if plr.weapon_melee is not None:
                         plr.store_in_inventory(plr.weapon_melee)
                     plr.weapon_melee = inv_item
+                    item_equipped = True
                 elif isinstance(inv_item, RangedWeapon):
                     if plr.weapon_ranged is not None:
                         plr.store_in_inventory(plr.weapon_ranged)
                     plr.weapon_ranged = inv_item
+                    item_equipped = True
                 elif isinstance(inv_item, Armor):  # TODO: create the wearables.Armor class
                     pass
                 elif isinstance(inv_item, Gear):  # TODO: create the wearables.Gear class
                     pass
 
-                item_equipped = True
+                if item_equipped:
+                    plr.inventory.remove(inv_item)
 
                 break
 

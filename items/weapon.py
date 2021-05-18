@@ -1,3 +1,4 @@
+import util
 from items.item import Item
 from items.tagging import Tags
 
@@ -10,3 +11,6 @@ class Weapon(Item):
         super().__init__(name, emoji_id)
         self.damage_out = damage_out
         self.durability = durability
+
+    def __str__(self):
+        return f"{self.name} ({util.emoji('diamond')}{self.durability})"

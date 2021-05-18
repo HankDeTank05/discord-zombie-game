@@ -100,7 +100,7 @@ class Shop:
     def buy_item(plr: player.Player, item_name: str) -> bool:
         for shop_item in ItemList.items:
             if shop_item.name.lower() == item_name.lower():
-                purchase = shop_item
+                purchase = shop_item()
                 print(f"found {shop_item.name}")
                 if len(plr.inventory) < player.Player.max_inventory and 0 <= purchase.price <= plr.money:
                     plr.money -= purchase.price

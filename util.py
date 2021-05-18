@@ -16,10 +16,14 @@ player_list_path = os.path.join(saves_folder_name, "test_player_list.txt")
 emoji_symbols = {
     "level": ":muscle:",
     "health": ":heart:",
-    "money": ":dollar:",
+    "money": ":moneybag:",
     "melee": ":boxing_glove:",
     "range": ":flying_disc:",
     "exp": ":sparkles:",
+    "gear": ":school_satchel:",
+    "armor": ":military_helmet:",
+    "diamond": ":gem:",
+    "?": ":grey_question:"
 }
 
 

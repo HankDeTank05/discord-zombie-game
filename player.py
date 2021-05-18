@@ -1,5 +1,7 @@
 import random
-from typing import Union, Type
+from typing import Union, Type, Tuple
+
+from discord.ext import commands
 
 import util
 from items.consumable import Consumable
@@ -17,10 +19,14 @@ class Player:
 
     # max health for level L = value at index L
     # value at index L = 100 + (L-1) * 5
-    max_health = [0] + [hp for hp in range(100, (100+(max_level-1)*5) + 1, 5)]
+    start_health = 100
+    health_increase_delta = 5
+    max_health = [0] + [hp for hp in range(start_health, (start_health+(max_level-1)*health_increase_delta) + 1, health_increase_delta)]
 
     # max exp for level L = 50 + (L-1) * 150
-    max_exp = [0] + [exp for exp in range(50, (50+(max_level-1)*150) + 1, 100)]
+    start_max_exp = 500
+    max_exp_increase_delta = 500
+    max_exp = [0] + [exp for exp in range(start_max_exp, (start_max_exp+(max_level-1)*max_exp_increase_delta) + 1, max_exp_increase_delta)]
 
     max_inventory = 30
 
@@ -101,6 +107,7 @@ class Player:
             self.gear_b = None
             self.armor_a = None
             self.armor_b = None
+            # TODO: add an instance variable for the time they're able to fight next
 
             util.new_save_file(player, self.make_data_dict())
             print(f"Making a new file for {player}")
@@ -151,29 +158,42 @@ class Player:
 
         return data
 
-    def profile(self):
+    def profile(self, bot):
         # TODO: change this so that it uses standard string table formatting
+        ammo_amt = 0
+        ammo_type = None
+        if self.weapon_ranged is not None:
+            ammo_type = self.weapon_ranged.ammo_type
+            for inv_item in self.inventory:
+                if isinstance(inv_item, ammo_type):
+                    ammo_amt += 1
+
         output = f"__**{self.id}'s profile**__\n" \
                  f"`Level            `{util.emoji('level')} {self.level}\n" \
                  f"`Experience       `{util.emoji('exp')} {self.exp}/{Player.max_exp[self.level]}\n" \
                  f"`Health           `{util.emoji('health')} {self.health}/{Player.max_health[self.level]}\n" \
                  f"`Money            `{util.emoji('money')} ${self.money}\n" \
-                 f"`Equipped (melee) `{util.emoji('melee')} {self.weapon_melee.name}\n" \
-                 f"`Equipped (range) `{util.emoji('range')} {self.weapon_ranged.name}\n"
-        # TODO: add a profile slot for gear_a
-        # TODO: add a profile slot for gear_b
-        # TODO: add a profile slot for armor_a
-        # TODO: add a profile slot for armor_b
+                 f"`Equipped (melee) `{util.emoji('melee')} {self.weapon_melee}\n" \
+                 f"`Equipped (range) `{util.emoji('range')} {self.weapon_ranged}"
+
+        if ammo_type is not None:
+            output += f"({bot.get_emoji(ammo_type.emoji_id)}{ammo_amt})"
+        output += "\n"
+
+        output +=f"`Gear A           `{util.emoji('gear')} {self.gear_a}\n" \
+                 f"`Gear B           `{util.emoji('gear')} {self.gear_b}\n" \
+                 f"`Armor A          `{util.emoji('armor')} {self.armor_a}\n" \
+                 f"`Armor B          `{util.emoji('armor')} {self.armor_b}\n"
         return output
 
-    def earn_exp(self, exp_earned: int) -> bool:
+    def earn_exp(self, exp_earned: int) -> Tuple[bool, int]:
         level_up = False
         self.exp += exp_earned
         if self.exp >= Player.max_exp[self.level]:
             self.exp -= Player.max_exp[self.level]
             self.level += 1
             level_up = True
-        return level_up
+        return level_up, exp_earned
 
     def save(self):
         util.save_progress(self.id, self.make_data_dict())
@@ -185,11 +205,13 @@ class Player:
             inter_range_size = max(self.weapon_ranged.range_size(), self.weapon_melee.range_size()) \
                                - min(self.weapon_ranged.range_size(), self.weapon_melee.range_size())
         elif self.weapon_ranged is not None:
-            return self.weapon_ranged.range_size()
+            inter_range_size = self.weapon_ranged.range_size()
         elif self.weapon_melee is not None:
-            return SniperRifle.range_max - self.weapon_melee.range_max
+            inter_range_size = SniperRifle.range_max - self.weapon_melee.range_max
 
-        return max(0, inter_range_size)
+        irs = max(0, inter_range_size)
+        print(f"inter_range_size = {irs}")
+        return irs
 
     def armor_total(self) -> int:
         armor_total = 0
@@ -203,12 +225,21 @@ class Player:
 
         # TODO: add code to earn experience when fighting zombies (probably num. kills/2)
 
+        level_up = False
+
         if self.weapon_melee is not None or self.weapon_ranged is not None:
+
+            # TODO: make them wait one minute before fighting again
 
             ''' HEALTH / ARMOR '''
 
             # health
-            health_difference = self.inter_range_size() + random.randrange(0, self.inter_range_size()) - self.armor_total()
+            irs = self.inter_range_size()
+            health_difference = -self.armor_total()
+            if self.weapon_melee is not None and self.weapon_ranged is not None:
+                health_difference += irs + random.randrange(0, self.inter_range_size())
+            else:
+                health_difference += irs//8
 
             # lose health
             self.health -= health_difference
@@ -222,18 +253,34 @@ class Player:
             ''' KILLS / PROFIT '''
 
             # kills
-            zombies_killed = 0
+            zombies_killed = random.randrange(0, 5)
+            melee_weapon_broke = False
+            melee_weapon_name = ""
+            ranged_weapon_broke = False
+            ranged_weapon_name = ""
             if self.weapon_melee is not None:
                 zombies_killed += self.weapon_melee.range_size()
+                self.weapon_melee.durability -= 1
+                if self.weapon_melee.durability <= 0:
+                    melee_weapon_name = self.weapon_melee.name
+                    self.weapon_melee = None
+                    melee_weapon_broke = True
             if self.weapon_ranged is not None:
                 zombies_killed += self.weapon_ranged.range_size()
+                self.weapon_ranged.durability -= 1
+                if self.weapon_ranged.durability <= 0:
+                    ranged_weapon_name = self.weapon_ranged.name
+                    self.weapon_ranged = None
+                    ranged_weapon_broke = True
 
             # calculate bonus additive
-            total_bonus_additive = 0
+            total_bonus_additive = health_difference * 4
             if self.weapon_melee is not None:
                 total_bonus_additive += self.weapon_melee.bonus_additive
             if self.weapon_ranged is not None:
                 total_bonus_additive += self.weapon_ranged.bonus_additive
+
+            level_up, exp_earned = self.earn_exp(zombies_killed * 3)
 
             # bonus additive is doubled when both melee and ranged weapons are equipped
             if self.weapon_melee is not None and self.weapon_ranged is not None:
@@ -241,24 +288,36 @@ class Player:
             money_gained = zombies_killed + random.randrange(0, total_bonus_additive + 1)
 
             # calculate total profit multiplier from gear
-            profit_multiplier = 1
+            profit_multiplier = 1.0
             if isinstance(self.gear_a, ProfitBuff):
                 profit_multiplier += self.gear_a.profit_multiplier
             if isinstance(self.gear_b, ProfitBuff):
                 profit_multiplier += self.gear_b.profit_multiplier
 
             # earn profit from kills
+            old_money = self.money
             self.money += money_gained
 
             output = f"__**Fighting Zombies**__\n" \
                      f"You lost {health_difference} health fighting zombies...\n" \
-                     f"Your health is now {util.emoji('health')} {self.health}/{Player.max_health[self.level]}\n" \
+                     f"Your health is now {util.emoji('health')}{self.health}/{Player.max_health[self.level]}\n" \
                      f"You killed {zombies_killed} zombies!\n" \
-                     f"On the bright side, you earned {util.emoji('money')} ${money_gained} from it!"
+                     f"On the bright side, you earned {util.emoji('money')} ${money_gained} from it! ({util.emoji('money')}{old_money} --> {util.emoji('money')}{self.money})\n" \
+                     f"You earned {util.emoji('exp')}{exp_earned} EXP from fighting"
+
+            if level_up:
+                output += f" and leveled up! You are now level {self.level}"
+            output += ".\n"
+
+            if melee_weapon_broke:
+                output += f"Your {melee_weapon_name} broke!\n"
+            if ranged_weapon_broke:
+                output += f"Your {ranged_weapon_name} broke!\n"
+
         else:
             output = "You cannot fight without weapons equipped!"
 
-        return output
+        return output, level_up
 
     def store_in_inventory(self, _item: Item) -> bool:
         if isinstance(_item, Item) and len(self.inventory) < Player.max_inventory:
@@ -277,8 +336,9 @@ class Player:
         inv_str = ""
         if not grouped:
             headers = ["Item", "Durability", "Uses Remaining"]
-            row_header_format = "{:^15}" * len(headers)
-            row_format = "{:<15}{:>15}{:>15}"
+            row_header_format = "{:^15}   " * len(headers)
+            row_header_format = row_header_format.strip()
+            row_format = "{:<15} | {:>15} | {:>15}"
 
             inv_str += "`" + row_header_format.format(*headers) + "`\n"
 

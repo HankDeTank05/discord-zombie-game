@@ -9,6 +9,9 @@ class Item:
         self.name = name
         self.icon = emoji_id
 
+    def __str__(self):
+        return self.name
+
     def make_data_dict(self) -> dict:
         data = {
             "item_type": "item",

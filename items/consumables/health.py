@@ -47,7 +47,7 @@ class PainKillers(HealthConsumable):
 
     name = "Pain Killers"
     emoji_id = -1
-    price = 1
+    price = 5
     base_uses = 5
     health_increase = 5
 
@@ -64,7 +64,7 @@ class FirstAidKit(HealthConsumable):
 
     name = "First Aid Kit"
     emoji_id = -1
-    price = -1
+    price = 25
     base_uses = 1
     health_increase = 25
 
@@ -81,7 +81,7 @@ class Medkit(HealthConsumable):
 
     name = "Medkit"
     emoji_id = -1
-    price = -1
+    price = 50
     base_uses = 1
     health_increase = 50
 
@@ -98,9 +98,9 @@ class Antidote(HealthConsumable):
 
     name = "Antidote"
     emoji_id = -1
-    price = -1
+    price = 1000
     base_uses = 1
-    health_increase = 999
+    health_increase = 1000
 
     tags = HealthConsumable.tags + [name.lower()]
 
